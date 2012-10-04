@@ -1,0 +1,103 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <h1>My first Python Qgis Plugin</h1>
+    <h2>Introduction</h2>
+    <p>I needed to make an html image map once for a small project. Because I was using arcview 3.1 at that time,
+    I found a nice repository <a href="#1">1</a> with all kind of scripts, and also one (Avenue) script to do exactly what I wanted: 
+    take the current map view, generate an image of it, and write an html-file with an image and 
+    map-area tags in it <a href="#2">2</a>.</p>
+    <p>Nowadays I'm using Qgis <a href="#3">3</a> ;-) . With QGis you can view your spatial data from Esri shapefile, miff files,
+    Postgis/Postgresql databases and even WMS (WebMappingSources) from around the internet.
+    One very nice feature is that from version 9.0 of Qgis on there will be an Python interface available.
+    Not only to manupulate the map via a console, but also to make small custom map applications using Python and Qgis. {see link}.
+    One nice feature of the 9.0 version is the ability to build your own plugins IN PYTHON.
+    </p>
+    <p>So to make a long story short: I wrote my first QGis plugin, thereby not only polishing up my (rather thin) Python knowledge,
+    but als learned how this Qt4 widget stuff is working, and what resource files are. I will try to write my ramblings down so
+    everybody with a little spatial and python knowledge can start hacking plugins!</p>
+    <p>I do not pretend to know the best way to write a plugin, but hope this plugin is usefull to somebody, or makes somebody enthousiast enough to start off him/herself</p>
+
+    <h2>Versions</h2>
+    <p>
+    <ul>
+        <li>0.5.0 (09-2010): implemented setting mapcanvas/images size (thanks Luuk Schaminee for idea)
+        <li>0.4.4 (05-2010): bugfix for on the fly projected projects (thanks Ivan Mincik)
+        <li>0.4.4 (05-2010): bugfix for on the fly projected projects (thanks Ivan Mincik)
+        <li>0.4.3 (05-2010): bugfix progressbar.setProperty issue in debian (thanks Ivan Mincik)
+        <li>0.4.2 (05-2010): bugfix for 'version'-exception
+        <li>0.4.1 (05-2010): fix for #1753 remove qt3 stuff
+        <li>0.4.0 (04-2010): added this Help, added onMouseOut attribute, now working for 'On The Fly Projected' layers (thanks Tim Barmann for finding and providing the right testdata)
+        <li>0.3.8 (10-2009): bugfix, rasterlayer as active layers, raised exceptions; Patrick Kaiser mentioned print-statemens as IO-exceptions in windows
+        <li>0.3.7 (??-2009): bugfix, working for 1.0
+        <li>0.3.1 (11-2008): bugfix, working for downloadable preview2 of 1.0. <a href="0.3.1/imagemap_plugin.zip">DOWNLOAD 0.3.1</a>
+        <li>0.3 (09-2008): upgrade to new plugin api, needed for 1.0. Now working for POINTS als (10x10buffer area) :-)
+        <li>0.2 (01-2008): fix for bad imagename (without path) in htmlfile, fix for not working with postgis layers, other menu item. Download this one for versions before version 1.0 of qgis  <a href="0.2/imagemap_plugin.zip">DOWNLOAD 0.2</a>
+        <li>0.1 (09-2007): initial version
+    </ul>
+    </p>
+
+    <h2>Download</h2>
+    <p>You will need Qgis &gt; version 0.9, and the python bindings installed. Download: see above for different versions.</a></p>
+    
+    <h2>What?</h2>
+    <p>This is how the dialog looks like:</p>
+    <p><img src="imagemapdialog.png"/></p>
+    <p>And this <a href="example.html" target="newwindow">example</a> shows what it generates: for a given polygon or multipolygon 
+    it will:
+    <li>write an screendump of current mapwindow as [name].png
+    <li>write an html file with some basic javascript and html for an <a href="http://en.wikipedia.org/wiki/Image_map">image map</a>:
+    <pre>&lt;area shape="polygon" href="CROATIA" onClick="mapOnClick('CROATIA')" onMouseOver="mapOnMouseOver('ZAGREB')" <br/>
+    coords="306,135,307,135,308,135,309,135,310,136,309,136,308,136,308,135,306,135"&gt; </pre>
+    <li>the attribute values href, onClick and onMouseOver are optional in area tags
+    <li>instead of writing ALL polygons to area tags, it's also possible to make a selection and just use this selection polygons to generate the area-tags.
+    </p> 
+    <h2>(Python) plugins</h2>
+    <p>The starting point for your own plugin will be the Qgis wiki: <a href="http://wiki.qgis.org/qgiswiki/DevelopingPluginsWithPython">
+    http://wiki.qgis.org/qgiswiki/DevelopingPluginsWithPython</a><a href="#4">4</a>. Then you will need to know something about how 
+to build a Qt4 gui, the public Python interface for QGis-plugins <a href="http://doc.qgis.org/classQgisInterface.html">http://doc.qgis.org/classQgisInterface.html</a>, and the interface of PyQt <a href="http://www.riverbankcomputing.com/static/Docs/PyQt4/pyqt4ref.html">http://www.riverbankcomputing.com/static/Docs/PyQt4/pyqt4ref.html</a>.</p> 
+    <p>
+    </p> 
+    <h2>Tips voor beginners (like me ;-) )</h2>
+    <h3>qt designer</h3>
+    <p>If you never build or used qt dialogs, here is the way to go:
+    <li>Using an '.ui'-file from another plugin, drag and drop you dialog together in Qt-Designer:
+    <p><img src="qtdesigner.png"/></p>
+    <li>This will give you an '.ui' file
+    <li>This .ui file is then compiled using pyuic4 to a python source file containing the gui class definition
+    <li>You can then define your own class (inheriting from the gui class file above AND QDialog and add the event/signal handlers to it
+    <li>if you named some widget for exampe 'chkBoxHref', there is an easy way to handle clicks from it by adding an method to the class with a certain name convention: on_chkBoxHref_stateChanged(self) etc
+    <li>I had some troubles to handle the events from the 'standard button bar', but... it's easy: see imagemapplugingui.py
+    </p>
+
+    <h3>The files:</h3>
+    <p>
+    <li><i>make file</i> (see in there for details about calling the pyuic4 and pyrcc4 programs)
+    <li><i>__init__.py</i> (init file to let qgis init the plugin 'as plugin')
+    <li><i>imagemap.png</i> (image left in the plugin dialog)
+    <li><i>imagemapicon.xpm</i> (button image in button bar)
+    <li><i>imagemapplugin.qrc</i> (xml file containing the resource to use)
+    <li><i>imagemapplugin_rc.py</i> (compiled qrc file with pyrcc4)
+    <li><i>imagemapplugingui.ui</i> (qt4 ui xml file containing the dialog/gui definition)
+    <li><i>ui_imagemapplugingui.py</i> (compiled ui file with pyuic4; contains class definition of: 'Ui_ImageMapPluginGui' (because main qt-object is name ImageMapPluginGui)
+    </p>
+    
+    <h2>Essential documentation</h2>
+    <p>There are some really good starting points in the blog and wiki: Tim Sutton's introduction in writing python apps using the Python Qgis interface <a href="#8">8</a> and a wiki page to show how to start with a simple Qgis python plugin <a href="#9">9</a></p>
+    <p>You will really need the pyqt-api documentation <a href="#5">5</a> and off course the qgis documentation <a href="#6">6</a></p>
+    <h2>Links and resources</h2>
+    <li><a name="1" href="http://software.geocomm.com/scripts/arcview/">(Free) arcview Avenue script for inspiration and idea's</a>
+    <li><a name="2" href="ftp://download1.geocomm.com/sd2/IMAGEMAP.ZIP">The original arcview image map extension</a>
+    <li><a name="3" href="http://www.qgis.org">The Qgis site</a>
+    <li><a name="4" href="http://wiki.qgis.org/qgiswiki/DevelopingPluginsWithPython">Wiki page about developing Qgis Python plugins</a>
+    <li><a name-"5" href="http://www.riverbankcomputing.com/static/Docs/PyQt4/pyqt4ref.html">PyQt documenation/api</a>
+    <li><a name="6" href="http://doc.qgis.org/classQgisInterface.html">QGis iface api and</a>
+    <li><a name="8" href="http://blog.qgis.org/?q=node/59">MUST READ: Tim Sutton's introduction in writing python apps using the Python Qgis interface</a>
+    <li><a name="9" href="http://wiki.qgis.org/qgiswiki/DevelopingPluginsWithPython">MUST READ: Wiki page to start with a simple Qgis python plugin</a>
+    <li><a href="http://wiki.qgis.org/qgiswiki/DevelopersCorner">Developers corner page in Wiki</a>
+
+    <h2>Tips, comments, questions: richard at-sign duif.net (Richard Duivenvoorde)</h2>
+
+</body>
+</html>

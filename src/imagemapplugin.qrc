@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/" >
+        <file>imagemap.png</file>
+        <file>imagemapicon.xpm</file>
+    </qresource>
+</RCC>

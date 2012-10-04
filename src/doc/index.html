@@ -1,0 +1,71 @@
+<html>
+  <title>Html Image Map Plugin</title>
+
+  <body>
+    <div style="width: 900px">
+
+      <h1>Html Image Map Plugin</h1>
+
+      <h2>Intro</h2>
+
+      <p>
+      With this plugin you can write an <a href="http://en.wikipedia.org/wiki/Image_map">Image Map</a> from current map. 
+      The active polygon or point layer will be used to define the clickable area's in the html.
+      Optional change mapcanvas (image) size to preferred size.
+      The attribute values href, onClick and onMouseOver and onMouseOut are optional in area tags.
+      Instead of writing ALL polygons to area tags, it's also possible to make a selection and just use this selection polygons to generate the area-tags.
+      </p>
+
+      <h2>How</h2>
+      <p>
+        <li>Load your data and symbolize all you layers
+        <li>Make one line or point vector layer the active layer, by selecting it in the legend
+        <li>Activate the plugin
+        <li>Optional: change mapcanvas (image) size to preferred size.
+        <li>Use the browse button to browse to a writable place on you filesystem where the html and png files will be written
+        <li>Select which html/javascript attributes you want to have in the final html
+        <li>Optional: select features, if you want only those features to be clickable (defaults to all features in window)
+        <li>For the selected attributes, select the layer attributes you want to use
+      </p>
+
+      <div style="margin:10px">
+        <img src="htmlimagemapplugindialog.png" alt="Main dialog" style="margin-bottom:5px">
+        <br>
+        <i>Dialog of Html Image Map Plugin</i>
+      </div>
+
+    <p>After pushing OK, the plugin will:
+     <li>write an screendump of current mapwindow as [name].png
+     <li>write an html file with some basic javascript and html for an <a href="http://en.wikipedia.org/wiki/Image_map">image map</a>:
+     <pre>&lt;area shape="polygon" href="CROATIA" onClick="mapOnClick('CROATIA')" onMouseOver="mapOnMouseOver('ZAGREB')"
+                     coords="306,135,307,135,308,135,309,135,310,136,309,136,308,136,308,135,306,135"&gt; </pre>
+     </p> 
+    <p>
+    REMARK: version 0.4 and higher can handle layers which 'On The Fly Projection' enabled. BUT it can handle this only if your
+    QGIS version is 1.5 or above. As a workaround you can save the layer with 'On The Fly Projected' as a shape in your destination src, 
+    load the shape (which is now in the right projection) and use that vector layer for the imagemap.
+    </p
+
+     <h2>Version history</h2>
+     <ul>
+        <li>0.5.0 (09-2010): implemented setting mapcanvas/images size (thanks Luuk Schaminee for idea)
+        <li>0.4.4 (05-2010): bugfix for on the fly projected projects (thanks Ivan Mincik)
+        <li>0.4.4 (05-2010): bugfix for on the fly projected projects (thanks Ivan Mincik)
+        <li>0.4.3 (05-2010): bugfix progressbar.setProperty issue in debian (thanks Ivan Mincik)
+        <li>0.4.2 (05-2010): bugfix for 'version'-exception
+        <li>0.4.1 (05-2010): fix for #1753 remove qt3 stuff
+        <li>0.4.0 (04-2010): added this Help, added onMouseOut attribute, now working for 'On The Fly Projected' layers (thanks Tim Barmann for finding and providing the right testdata)
+        <li>0.3.8 (10-2009): bugfix, rasterlayer as active layer raised exceptions, fix for Window IO error (thanks Patrick Kaisers)
+        <li>0.3.7 (??-2009): bugfix, working for 1.0
+        <li>0.3.1 (11-2008): bugfix, working for downloadable preview2 of 1.0
+        <li>0.3.0 (09-2008): upgrade to new plugin api, needed for 1.0. Now working for POINTS als (10x10buffer area) :-)
+        <li>0.2.0 (01-2008): fix for bad imagename (without path) in htmlfile, fix for not working with postgis layers, other menu item. Download this one for versions before version 1.0 of qgis  <a href="0.2/imagemap_plugin.zip">DOWNLOAD 0.2</a>
+        <li>0.1.0 (09-2007): initial version
+    </ul>
+
+
+      <h2>Tips, comments, questions: <br/>
+        richard at-sign duif.net (Richard Duivenvoorde)</h2>
+    </div>
+  </body>
+</html>

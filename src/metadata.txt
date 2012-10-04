@@ -1,0 +1,31 @@
+; the next section is mandatory
+[general]
+name:Html Image Map Plugin
+qgisMinimumVersion:1.0
+description:This plugin generates a HTML-image map file+img from the active point or polygon layer
+version:0.5.2
+; end of mandatory metadata
+
+
+; start of optional metadata
+
+changelog:
+    0.5.2   (10-2012) moving from svn to git, polygon -> poly html fix (thanks Kurt Trinko)
+    0.5.1   (11-2011) small renaming
+    0.5.0   (09-2010) implemented setting mapcanvas/images size (thanks Luuk Schaminee for idea)
+    0.4.4   (05-2010) bugfix for on the fly projected projects (thanks Ivan Mincik)
+    0.4.3   (05-2010) bugfix progressbar.setProperty issue in debian (thanks Ivan Mincik)
+    0.4.2   (05-2010) bugfix for 'version'-exception
+    0.4.1   (05-2010) fix for #1753 remove qt3 stuff
+    0.4.0   (04-2010) added this Help, added onMouseOut attribute, now working for 'On The Fly Projected' layers (thanks Tim Barmann for finding and providing the right testdata)
+    0.3.8   (10-2009) bugfix, rasterlayer as active layers, raised exceptions; Patrick Kaiser mentioned print-statemens as IO-exceptions in windows
+    0.3.7   (??-2009) bugfix, working for 1.0
+    0.3.1   (11-2008) bugfix, working for downloadable preview2 of 1.0. DOWNLOAD 0.3.1
+    0.3     (09-2008) upgrade to new plugin api, needed for 1.0. Now working for POINTS als (10x10buffer area) :-)
+    0.2     (01-2008) fix for bad imagename (without path) in htmlfile, fix for not working with postgis layers, other menu item. Download this one for versions before version 1.0 of qgis DOWNLOAD 0.2
+    0.1     (09-2007) initial version 
+
+homepage:http://hub.qgis.org/projects/xytools
+repository:http://hub.qgis.org/projects/xytools/repository
+tracker:http://hub.qgis.org/projects/xytools/issues
+icon:icon.png
