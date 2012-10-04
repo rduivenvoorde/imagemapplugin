@@ -89,18 +89,18 @@ class ImageMapPlugin:
   def writeHtml(self):
     # create a holder for retrieving features from the provider
     feature = QgsFeature();
-    temp = str(self.filesPath+".png")
+    temp = unicode(self.filesPath+".png")
     imgfilename = os.path.basename(temp)
-    html = ['<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"><html>']
+    html = [u'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"><html>']
     # some rudimentary javascript to show off the mouse click and mouse over
-    html.append('<head><title>QGIS</title><script type="text/javascript">\n')
-    html.append('function mapOnMouseOver(str){document.getElementById("mousemovemessage").innerHTML=str; }\n')
-    html.append('function mapOnMouseOut(str){document.getElementById("mousemovemessage").innerHTML="out of "+str; }\n')
-    html.append('function mapOnClick(str){alert(str);}\n')
-    html.append('</script> </head> <body>')
-    html.append('<div id="mousemovemessage"></div><br>')
-    html.append('<img src="' + imgfilename + '" border="0" ismap="ismap" usemap="#mapmap" alt="html imagemap created with QGIS" >\n')
-    html.append('<map name="mapmap">\n')
+    html.append(u'<head><title>QGIS</title><script type="text/javascript">\n')
+    html.append(u'function mapOnMouseOver(str){document.getElementById("mousemovemessage").innerHTML=str; }\n')
+    html.append(u'function mapOnMouseOut(str){document.getElementById("mousemovemessage").innerHTML="out of "+str; }\n')
+    html.append(u'function mapOnClick(str){alert(str);}\n')
+    html.append(u'</script> </head> <body>')
+    html.append(u'<div id="mousemovemessage"></div><br>')
+    html.append(u'<img src="' + imgfilename + '" border="0" ismap="ismap" usemap="#mapmap" alt="html imagemap created with QGIS" >\n')
+    html.append(u'<map name="mapmap">\n')
 
     mapCanvasExtent = self.iface.mapCanvas().extent()
     doSrsTransform = False
@@ -185,7 +185,7 @@ class ImageMapPlugin:
                 for ring in polygon:
                     h = self.ring2area(feature, ring, projectExtent, projectExtentAsPolygon)
                     html.append(h)
-    html.append('</map></body></html>')
+    html.append(u'</map></body></html>')
     return html
 
   def renderTest(self, painter):
@@ -245,8 +245,8 @@ class ImageMapPlugin:
       parent.resize(parent.size().width()-diffWidth, parent.size().height()-diffHeight)
 
   def go(self, foo):
-    htmlfilename = self.filesPath + ".html"
-    imgfilename = self.filesPath + ".png"
+    htmlfilename = unicode(self.filesPath + ".html")
+    imgfilename = unicode(self.filesPath + ".png")
     # check if path is writable: ?? TODO
     #if not os.access(htmlfilename, os._OK):
     #  QMessageBox.warning(self.iface.mainWindow(), self.MSG_BOX_TITLE, ("Unable to write file with this name.\n" "Please choose a valid filename and a writable directory."))
@@ -261,7 +261,10 @@ class ImageMapPlugin:
             raise IOError
         file = open(htmlfilename, "w")
         html = self.writeHtml()
-        file.writelines(html)
+        # file.writelines(html)
+        for line in html:
+          #print '%s - %s' % (type(line),line)
+          file.write(line.encode('utf-8'))
         file.close()
         self.iface.mapCanvas().saveAsImage(imgfilename)
         msg = "Files successfully saved to:\n" + self.filesPath
@@ -284,8 +287,8 @@ class ImageMapPlugin:
   # generate a string like:
   # <area shape=polygon href='xxx' onClick="mapOnClick('yyy')" onMouseOver="mapOnMouseOver('zzz')  coords=519,-52,519,..,-52,519,-52>
   def ring2area(self, feature, ring, extent, extentAsPoly):
-    param = ''
-    htm = '<area shape="poly" '
+    param = u''
+    htm = u'<area shape="poly" '
     if self.imageMapPluginGui.isHrefChecked():
         htm = htm + 'href="' + feature.attributeMap()[self.hrefAttributeIndex].toString() + '" '
     if self.imageMapPluginGui.isOnClickChecked():
@@ -330,9 +333,9 @@ class ImageMapPlugin:
     else:
         # using last param as alt parameter (to be W3 compliant we need one)
         htm += '" alt="' + param + '">\n'
-        return htm
+        return unicode(htm)
 
 
   # escape ' and " so string can be safely used as string javascript argument
   def jsEscapeString(self, str):
-    return str.replace("'", "\\'").replace('"', '\"')
+    return unicode(str.replace("'", "\\'").replace('"', '\"'))

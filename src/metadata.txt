@@ -4,7 +4,7 @@
 name:Html Image Map Plugin
 qgisMinimumVersion:1.0
 description:This plugin generates a HTML-image map file+img from the active point or polygon layer
-version:0.5.2
+version:0.5.3
 
 ; end of mandatory metadata
 
@@ -12,6 +12,7 @@ version:0.5.2
 ; start of optional metadata
 
 changelog:
+    0.5.3   (10-2012) fixing utf-8 encoding bugs (thanks Kurt Trinko)
     0.5.2   (10-2012) moving from svn to git, polygon -> poly html fix (thanks Kurt Trinko)
     0.5.1   (11-2011) small renaming
     0.5.0   (09-2010) implemented setting mapcanvas/images size (thanks Luuk Schaminee for idea)
