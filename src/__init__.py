@@ -14,7 +14,7 @@ def qgisMinimumVersion():
     return "1.0"
 
 def version():
-    return "0.5.1"
+    return "0.5.2"
 
 def authorName():
     return "Richard Duivenvoorde"
