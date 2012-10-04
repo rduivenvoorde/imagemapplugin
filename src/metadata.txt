@@ -1,9 +1,11 @@
 ; the next section is mandatory
+
 [general]
 name:Html Image Map Plugin
 qgisMinimumVersion:1.0
 description:This plugin generates a HTML-image map file+img from the active point or polygon layer
 version:0.5.2
+
 ; end of mandatory metadata
 
 
@@ -25,7 +27,8 @@ changelog:
     0.2     (01-2008) fix for bad imagename (without path) in htmlfile, fix for not working with postgis layers, other menu item. Download this one for versions before version 1.0 of qgis DOWNLOAD 0.2
     0.1     (09-2007) initial version 
 
-homepage:http://hub.qgis.org/projects/xytools
-repository:http://hub.qgis.org/projects/xytools/repository
-tracker:http://hub.qgis.org/projects/xytools/issues
+homepage:http://hub.qgis.org/projects/imagemapplugin
+repository:http://hub.qgis.org/projects/imagemapplugin/repository
+tracker:http://hub.qgis.org/projects/imagemapplugin/issues
+
 icon:icon.png

@@ -91,15 +91,15 @@ class ImageMapPlugin:
     feature = QgsFeature();
     temp = str(self.filesPath+".png")
     imgfilename = os.path.basename(temp)
-    html = ['<html>']
+    html = ['<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"><html>']
     # some rudimentary javascript to show off the mouse click and mouse over
-    html.append('<head><script>\n')
+    html.append('<head><title>QGIS</title><script type="text/javascript">\n')
     html.append('function mapOnMouseOver(str){document.getElementById("mousemovemessage").innerHTML=str; }\n')
     html.append('function mapOnMouseOut(str){document.getElementById("mousemovemessage").innerHTML="out of "+str; }\n')
     html.append('function mapOnClick(str){alert(str);}\n')
-    html.append('</script></head><body>')
-    html.append('<div id="mousemovemessage"></div><br/>')
-    html.append('<img src="' + imgfilename + '" border="0" ismap="1" usemap="#mapmap" >\n')
+    html.append('</script> </head> <body>')
+    html.append('<div id="mousemovemessage"></div><br>')
+    html.append('<img src="' + imgfilename + '" border="0" ismap="ismap" usemap="#mapmap" alt="html imagemap created with QGIS" >\n')
     html.append('<map name="mapmap">\n')
 
     mapCanvasExtent = self.iface.mapCanvas().extent()
@@ -284,19 +284,20 @@ class ImageMapPlugin:
   # generate a string like:
   # <area shape=polygon href='xxx' onClick="mapOnClick('yyy')" onMouseOver="mapOnMouseOver('zzz')  coords=519,-52,519,..,-52,519,-52>
   def ring2area(self, feature, ring, extent, extentAsPoly):
-    htm = '<area shape="polygon" '
+    param = ''
+    htm = '<area shape="poly" '
     if self.imageMapPluginGui.isHrefChecked():
         htm = htm + 'href="' + feature.attributeMap()[self.hrefAttributeIndex].toString() + '" '
     if self.imageMapPluginGui.isOnClickChecked():
-        # escape ' and " because the will collapse as javascript parameter
+        # escape ' and " because they will collapse as javascript parameter
         param = feature.attributeMap()[self.onClickAttributeIndex].toString()
         htm = htm + 'onClick="mapOnClick(\'' + self.jsEscapeString(param) + '\')" '
     if self.imageMapPluginGui.isOnMouseOverChecked():
-        # escape ' and " because the will collapse as javascript parameter
+        # escape ' and " because they will collapse as javascript parameter
         param = feature.attributeMap()[self.onMouseOverAttributeIndex].toString()
         htm = htm + 'onMouseOver="mapOnMouseOver(\'' + self.jsEscapeString(param) + '\')" '
     if self.imageMapPluginGui.isOnMouseOutChecked():
-        # escape ' and " because the will collapse as javascript parameter
+        # escape ' and " because they will collapse as javascript parameter
         param = feature.attributeMap()[self.onMouseOutAttributeIndex].toString()
         htm = htm + 'onMouseOut="mapOnMouseOut(\'' + self.jsEscapeString(param) + '\')" '
     htm = htm + ' coords="'
@@ -327,7 +328,8 @@ class ImageMapPlugin:
         #print "RING FULLY OUTSIDE EXTENT: %s " % ring
         return ''
     else:
-        htm += '">\n'
+        # using last param as alt parameter (to be W3 compliant we need one)
+        htm += '" alt="' + param + '">\n'
         return htm
 
 
