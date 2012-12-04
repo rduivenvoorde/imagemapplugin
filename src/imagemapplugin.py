@@ -319,7 +319,7 @@ class ImageMapPlugin:
             coordCount = coordCount +1
             htm += (str(pixpoint[0]) + ',' + str(pixpoint[1]) + ',')
             lastPixel = pixpoint
-    htm.remove(len(htm)-1,len(htm))
+    htm = htm[0:-1]
     # check if there are more then 2 coords: very small polygons on current map can have coordinates
     # which if rounded to pixels all come to the same pixel, resulting in just ONE x,y coordinate
     # we skip these

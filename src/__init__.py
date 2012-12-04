@@ -14,10 +14,13 @@ def qgisMinimumVersion():
     return "1.0"
 
 def version():
-    return "0.5.3"
+    return "0.5.4"
 
-def authorName():
+def author():
     return "Richard Duivenvoorde"
+
+def email():
+    return "richard@duif.net"
 
 def classFactory(iface):
     return ImageMapPlugin(iface)

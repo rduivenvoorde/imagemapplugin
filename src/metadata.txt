@@ -2,9 +2,11 @@
 
 [general]
 name:Html Image Map Plugin
+author:Richard Duivenvoorde
+email:richard@duif.net
 qgisMinimumVersion:1.0
 description:This plugin generates a HTML-image map file+img from the active point or polygon layer
-version:0.5.3
+version:0.5.4
 
 ; end of mandatory metadata
 
@@ -12,6 +14,7 @@ version:0.5.3
 ; start of optional metadata
 
 changelog:
+    0.5.4   (11-2012) utf fix (thanks Paolo Cavallini)
     0.5.3   (10-2012) fixing utf-8 encoding bugs (thanks Kurt Trinko)
     0.5.2   (10-2012) moving from svn to git, polygon -> poly html fix (thanks Kurt Trinko)
     0.5.1   (11-2011) small renaming
