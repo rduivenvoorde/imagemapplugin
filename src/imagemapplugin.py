@@ -59,10 +59,16 @@ class ImageMapPlugin:
         return
 
     # we need the fields of the active layer to show in the attribute combobox in the gui:
-    fields = self.provider.fields()
     attrFields = []
-    for (i, field) in fields.iteritems():
-      attrFields.append(field.name().trimmed())
+
+    fields = self.provider.fields()
+    if hasattr(fields, 'iteritems'):
+      for (i, field) in fields.iteritems():
+        attrFields.append(field.name().trimmed())
+    else:
+        for field in self.provider.fields():
+          attrFields.append(field.name().trimmed())
+
     # construct gui (using these fields)
     flags = Qt.WindowTitleHint | Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint  # QgisGui.ModalDialogFlags
     # construct gui: if available reuse this one
@@ -103,64 +109,90 @@ class ImageMapPlugin:
     html.append(u'<map name="mapmap">\n')
 
     mapCanvasExtent = self.iface.mapCanvas().extent()
-    doSrsTransform = False
+    doCrsTransform = False
 
     # in case of 'on the fly projection' 
     # AND 
     # different srs's for mapCanvas/project and layer we have to reproject stuff
-    destinationSrs = self.iface.mapCanvas().mapRenderer().destinationSrs()
-    #print 'destination srs: %s:' % destinationSrs.toProj4()
-    layerSrs = self.iface.activeLayer().srs()
-    #print 'layer srs:       %s:' % layerSrs.toProj4()
-    if not destinationSrs == layerSrs:
-      # we have to transform the mapCanvasExtent to the data/layer Srs to be able
+    if hasattr(self.iface.mapCanvas().mapRenderer(), 'destinationSrs'):
+      # QGIS < 2.0
+      destinationCrs = self.iface.mapCanvas().mapRenderer().destinationSrs()
+      layerCrs = self.iface.activeLayer().srs()
+    else:
+      destinationCrs = self.iface.mapCanvas().mapRenderer().destinationCrs()
+      layerCrs = self.iface.activeLayer().crs()
+    #print 'destination crs: %s:' % destinationCrs.toProj4()
+    #print 'layer crs:       %s:' % layerCrs.toProj4()
+    if not destinationCrs == layerCrs:
+      # we have to transform the mapCanvasExtent to the data/layer Crs to be able
       # to retrieve the features from the data provider
       # but ONLY if we are working with on the fly projection
       # (because in that case we just 'fly' to the raw coordinates from data)
       if self.iface.mapCanvas().hasCrsTransformEnabled():
-        srsTransform = QgsCoordinateTransform(destinationSrs, layerSrs)
-        mapCanvasExtent = srsTransform.transformBoundingBox(mapCanvasExtent)
+        crsTranform = QgsCoordinateTransform(destinationCrs, layerCrs)
+        mapCanvasExtent = crsTranform.transformBoundingBox(mapCanvasExtent)
         # we have to have a transformer to do the transformation of the geometries
         # to the mapcanvas srs ourselves:
-        srsTransform = QgsCoordinateTransform(layerSrs, destinationSrs)
-        doSrsTransform = True
+        crsTranform = QgsCoordinateTransform(layerCrs, destinationCrs)
+        doCrsTransform = True
     # now iterate through each feature
     # select features within current extent,
-    #   with  ALL attributes, WITHIN extent, WITH geom, AND using Intersect instead of bbox
-    self.provider.select(self.provider.attributeIndexes(), mapCanvasExtent, True, True)
-    # get a list of all selected features ids
-    selectedFeaturesIds = self.iface.activeLayer().selectedFeaturesIds()
     # set max progress bar to number of features (not very accurate with a lot of huge multipolygons)
     #self.imageMapPluginGui.setProgressBarMax(self.iface.activeLayer().featureCount())
     # or run over all features in current selection, just to determine the number of... (should be simpler ...)
     count = 0
-    while self.provider.nextFeature(feature):
-        count = count + 1
+    #   with  ALL attributes, WITHIN extent, WITH geom, AND using Intersect instead of bbox
+    if hasattr(self.provider, 'select'):
+        self.provider.select(self.provider.attributeIndexes(), mapCanvasExtent, True, True)
+        while self.provider.nextFeature(feature):
+            count = count + 1
+    else:
+        request = QgsFeatureRequest().setFilterRect(mapCanvasExtent)
+        for feature in self.iface.activeLayer().getFeatures(request):
+            count = count + 1
     self.imageMapPluginGui.setProgressBarMax(count)
     progressValue = 0
     # in case of points / lines we need to buffer geometries, calculate bufferdistance here
     bufferDistance = self.iface.mapCanvas().mapUnitsPerPixel()*10 #(plusminus 20pixel areas)
 
+    # get a list of all selected features ids
+    selectedFeaturesIds = self.iface.activeLayer().selectedFeaturesIds()
     # it seems that a postgres provider is on the end of file now
     # we do the select again to set the pointer/cursor to 0 again ?
-    self.provider.select(self.provider.attributeIndexes(), mapCanvasExtent, True, True)
-    while self.provider.nextFeature(feature):
-      progressValue = progressValue+1
-      self.imageMapPluginGui.setProgressBarValue(progressValue)
-      # if checkbox 'selectedFeaturesOnly' is checked: check if this feature is selected
-      if self.selectedFeaturesOnly and feature.id() not in selectedFeaturesIds:
+    if hasattr(self.provider, 'select'):
+        self.provider.select(self.provider.attributeIndexes(), mapCanvasExtent, True, True)
+        while self.provider.nextFeature(feature):
+            html.extend( self.handleGeom(feature, selectedFeaturesIds, doCrsTransform, bufferDistance) )
+            progressValue = progressValue+1
+            self.imageMapPluginGui.setProgressBarValue(progressValue)
+    else:   # QGIS >= 2.0
+        for feature in self.iface.activeLayer().getFeatures(request):
+            html.extend( self.handleGeom(feature, selectedFeaturesIds, doCrsTransform, bufferDistance) )
+            progressValue = progressValue+1
+            self.imageMapPluginGui.setProgressBarValue(progressValue)
+    html.append(u'</map></body></html>')
+    return html
+
+  def handleGeom(self, feature, selectedFeaturesIds, doCrsTransform, bufferDistance):
+    html = []
+    # if checkbox 'selectedFeaturesOnly' is checked: check if this feature is selected
+    if self.selectedFeaturesOnly and feature.id() not in selectedFeaturesIds:
         # print "skipping %s " % feature.id()
         None
-      else:
+    else:
         geom = feature.geometry()
-        layerSrs = self.iface.activeLayer().srs()
-        if doSrsTransform:
-          if hasattr(geom, "transform"):
-            geom.transform(srsTransform)
-          else:
-            QMessageBox.warning(self.iface.mainWindow(), self.MSG_BOX_TITLE, ("Cannot crs-transform geometry in your QGIS version ...\n" "Only QGIS version 1.5 and above can transform geometries on the fly\n" "As a workaround, you can try to save the layer in the destination crs (eg as shapefile) and reload that layer...\n"), QMessageBox.Ok, QMessageBox.Ok)
-            break
-        
+        if hasattr(self.iface.activeLayer(), "srs"):
+            # QGIS < 2.0
+            layerCrs = self.iface.activeLayer().srs()
+        else:
+            layerCrs = self.iface.activeLayer().crs()
+        if doCrsTransform:
+            if hasattr(geom, "transform"):
+                geom.transform(crsTranform)
+            else:
+                QMessageBox.warning(self.iface.mainWindow(), self.MSG_BOX_TITLE, ("Cannot crs-transform geometry in your QGIS version ...\n" "Only QGIS version 1.5 and above can transform geometries on the fly\n" "As a workaround, you can try to save the layer in the destination crs (eg as shapefile) and reload that layer...\n"), QMessageBox.Ok, QMessageBox.Ok)
+                #break
+                raise Exception("Cannot crs-transform geometry in your QGIS version ...\n" "Only QGIS version 1.5 and above can transform geometries on the fly\n" "As a workaround, you can try to save the layer in the destination crs (eg as shapefile) and reload that layer...\n")
         projectExtent = self.iface.mapCanvas().extent()
         projectExtentAsPolygon = QgsGeometry()
         projectExtentAsPolygon = QgsGeometry.fromRect(projectExtent)
@@ -185,7 +217,6 @@ class ImageMapPlugin:
                 for ring in polygon:
                     h = self.ring2area(feature, ring, projectExtent, projectExtentAsPolygon)
                     html.append(h)
-    html.append(u'</map></body></html>')
     return html
 
   def renderTest(self, painter):
@@ -261,9 +292,7 @@ class ImageMapPlugin:
             raise IOError
         file = open(htmlfilename, "w")
         html = self.writeHtml()
-        # file.writelines(html)
         for line in html:
-          #print '%s - %s' % (type(line),line)
           file.write(line.encode('utf-8'))
         file.close()
         self.iface.mapCanvas().saveAsImage(imgfilename)
@@ -289,19 +318,22 @@ class ImageMapPlugin:
   def ring2area(self, feature, ring, extent, extentAsPoly):
     param = u''
     htm = u'<area shape="poly" '
+    if hasattr(feature, 'attributeMap'):
+        attrs = feature.attributeMap()
+    else:
+        # QGIS > 2.0
+        attrs = feature
+    # escape ' and " because they will collapse as javascript parameter
     if self.imageMapPluginGui.isHrefChecked():
-        htm = htm + 'href="' + feature.attributeMap()[self.hrefAttributeIndex].toString() + '" '
+        htm = htm + 'href="' + attrs[self.hrefAttributeIndex].toString() + '" '
     if self.imageMapPluginGui.isOnClickChecked():
-        # escape ' and " because they will collapse as javascript parameter
-        param = feature.attributeMap()[self.onClickAttributeIndex].toString()
+        param = attrs[self.onClickAttributeIndex].toString()
         htm = htm + 'onClick="mapOnClick(\'' + self.jsEscapeString(param) + '\')" '
     if self.imageMapPluginGui.isOnMouseOverChecked():
-        # escape ' and " because they will collapse as javascript parameter
-        param = feature.attributeMap()[self.onMouseOverAttributeIndex].toString()
+        param = attrs[self.onMouseOverAttributeIndex].toString()
         htm = htm + 'onMouseOver="mapOnMouseOver(\'' + self.jsEscapeString(param) + '\')" '
     if self.imageMapPluginGui.isOnMouseOutChecked():
-        # escape ' and " because they will collapse as javascript parameter
-        param = feature.attributeMap()[self.onMouseOutAttributeIndex].toString()
+        param = attrs[self.onMouseOutAttributeIndex].toString()
         htm = htm + 'onMouseOut="mapOnMouseOut(\'' + self.jsEscapeString(param) + '\')" '
     htm = htm + ' coords="'
     lastPixel=[0,0]

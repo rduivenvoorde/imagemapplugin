@@ -48,7 +48,7 @@ install: all
 	cp src/*.py $(INST_DIR)/
 	cp -r src/doc/* $(INST_DIR)/doc/
 	#qgis /home/richard/dev/qgis/world.qgs &
-	qgis /home/richard/geodata/nl/prov.qgs
+	qgis /home/richard/dev/qgis/projects/imagemap/imagemap.qgs
 	#/home/richard/apps/qgis/trunk/bin/qgis #/home/richard/geodata/prov.qgs &
 
 
