@@ -1,3 +1,23 @@
+"""
+/***************************************************************************
+ImageMapPlugin
+
+This plugin generates a HTML-image map file+img from the active point 
+or polygon layer
+
+copyright            : (C) 2011 by Richard Duivenvoorde
+email                : richard@duif.net
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+"""
 import os
 import platform
 
@@ -28,14 +48,21 @@ class ImageMapPlugin:
     QObject.connect(self.action, SIGNAL("triggered()"), self.run)
     # add toolbar button and menu item
     self.iface.addToolBarIcon(self.action)
-    self.iface.addPluginToMenu("&Html Image Map Plugin", self.action)
+    if hasattr ( self.iface, "addPluginToWebMenu" ):
+        self.iface.addPluginToWebMenu("&Html Image Map Plugin", self.action)
+    else:
+        self.iface.addPluginToMenu("&Html Image Map Plugin", self.action)
+
     #self.iface.pluginMenu().insertAction(self.action)
     # connect to signal renderComplete which is emitted when canvas rendering is done
     QObject.connect(self.iface.mapCanvas(), SIGNAL("renderComplete(QPainter *)"), self.renderTest)
 
   def unload(self):
     # remove the plugin menu item and icon
-    self.iface.removePluginMenu("&Html Image Map Plugin",self.action)
+    if hasattr ( self.iface, "addPluginToWebMenu" ):
+        self.iface.removePluginWebMenu("&Html Image Map Plugin",self.action)
+    else:
+        self.iface.removePluginMenu("&Html Image Map Plugin",self.action)
     self.iface.removeToolBarIcon(self.action)
     # disconnect form signal of the canvas
     QObject.disconnect(self.iface.mapCanvas(), SIGNAL("renderComplete(QPainter *)"), self.renderTest)
