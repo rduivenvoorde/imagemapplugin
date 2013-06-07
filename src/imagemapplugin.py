@@ -156,11 +156,11 @@ class ImageMapPlugin:
       # but ONLY if we are working with on the fly projection
       # (because in that case we just 'fly' to the raw coordinates from data)
       if self.iface.mapCanvas().hasCrsTransformEnabled():
-        crsTranform = QgsCoordinateTransform(destinationCrs, layerCrs)
-        mapCanvasExtent = crsTranform.transformBoundingBox(mapCanvasExtent)
+        self.crsTransform = QgsCoordinateTransform(destinationCrs, layerCrs)
+        mapCanvasExtent = self.crsTransform.transformBoundingBox(mapCanvasExtent)
         # we have to have a transformer to do the transformation of the geometries
         # to the mapcanvas srs ourselves:
-        crsTranform = QgsCoordinateTransform(layerCrs, destinationCrs)
+        self.crsTransform = QgsCoordinateTransform(layerCrs, destinationCrs)
         doCrsTransform = True
     # now iterate through each feature
     # select features within current extent,
@@ -215,7 +215,7 @@ class ImageMapPlugin:
             layerCrs = self.iface.activeLayer().crs()
         if doCrsTransform:
             if hasattr(geom, "transform"):
-                geom.transform(crsTranform)
+                geom.transform(self.crsTransform)
             else:
                 QMessageBox.warning(self.iface.mainWindow(), self.MSG_BOX_TITLE, ("Cannot crs-transform geometry in your QGIS version ...\n" "Only QGIS version 1.5 and above can transform geometries on the fly\n" "As a workaround, you can try to save the layer in the destination crs (eg as shapefile) and reload that layer...\n"), QMessageBox.Ok, QMessageBox.Ok)
                 #break
