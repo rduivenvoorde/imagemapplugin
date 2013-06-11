@@ -62,7 +62,7 @@ class ImageMapPluginGui(QDialog, Ui_ImageMapPluginGui):
 
   # if the text in this field is stil beginning with: 'full path and name'
   def on_txtFileName_cursorPositionChanged(self, old, new):
-    if self.txtFileName.text().startsWith(self.PATH_STRING):  # text() returns QString => startsWith instead startswith
+    if self.txtFileName.text().startswith(self.PATH_STRING):  # text() returns QString => startsWith instead startswith
         self.txtFileName.setText('')
 
   # see http://www.riverbankcomputing.com/Docs/PyQt4/pyqt4ref.html#connecting-signals-and-slots

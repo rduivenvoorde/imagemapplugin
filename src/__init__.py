@@ -28,10 +28,10 @@ def description():
     return "This plugin generates a HTML-image map file+img from the active point or polygon layer"
 
 def qgisMinimumVersion():
-    return "1.0"
+    return "2.0"
 
 def version():
-    return "0.6.1"
+    return "2.0.0"
 
 def author():
     return "Richard Duivenvoorde"

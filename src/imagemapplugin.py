@@ -94,7 +94,7 @@ class ImageMapPlugin:
         attrFields.append(field.name().trimmed())
     else:
         for field in self.provider.fields():
-          attrFields.append(field.name().trimmed())
+          attrFields.append(field.name().strip())
 
     # construct gui (using these fields)
     flags = Qt.WindowTitleHint | Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint  # QgisGui.ModalDialogFlags
@@ -352,15 +352,15 @@ class ImageMapPlugin:
         attrs = feature
     # escape ' and " because they will collapse as javascript parameter
     if self.imageMapPluginGui.isHrefChecked():
-        htm = htm + 'href="' + attrs[self.hrefAttributeIndex].toString() + '" '
+        htm = htm + 'href="' + unicode(attrs[self.hrefAttributeIndex]) + '" '
     if self.imageMapPluginGui.isOnClickChecked():
-        param = attrs[self.onClickAttributeIndex].toString()
+        param = unicode(attrs[self.onClickAttributeIndex])
         htm = htm + 'onClick="mapOnClick(\'' + self.jsEscapeString(param) + '\')" '
     if self.imageMapPluginGui.isOnMouseOverChecked():
-        param = attrs[self.onMouseOverAttributeIndex].toString()
+        param = unicode(attrs[self.onMouseOverAttributeIndex])
         htm = htm + 'onMouseOver="mapOnMouseOver(\'' + self.jsEscapeString(param) + '\')" '
     if self.imageMapPluginGui.isOnMouseOutChecked():
-        param = attrs[self.onMouseOutAttributeIndex].toString()
+        param = unicode(attrs[self.onMouseOutAttributeIndex])
         htm = htm + 'onMouseOut="mapOnMouseOut(\'' + self.jsEscapeString(param) + '\')" '
     htm = htm + ' coords="'
     lastPixel=[0,0]
