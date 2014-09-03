@@ -41,6 +41,7 @@ class ImageMapPlugin:
     self.iface = iface
     self.filesPath = "/tmp/foo"
 
+
   def initGui(self):
     # create action that will start plugin configuration
     self.action = QAction(QIcon(":/imagemapicon.xpm"), "Image Map", self.iface.mainWindow())
@@ -277,6 +278,9 @@ class ImageMapPlugin:
   def setMapCanvasSize(self, newWidth, newHeight):
     mapCanvas=self.iface.mapCanvas()
     parent=mapCanvas.parentWidget()
+    # QGIS 2.4 places another widget between mapcanvas and qmainwindow, so:
+    if not parent.parentWidget() == None:
+        parent = parent.parentWidget()
     # some QT magic for me, coming from maximized force a minimal layout change first
     if(parent.isMaximized()):
       QMessageBox.warning(self.iface.mainWindow(), self.MSG_BOX_TITLE, ("Maximized QGIS window..\n" "QGIS window is maximized, plugin will try to de-maximize the window.\n" "If image size is still not exact what you asked for,\ntry starting plugin with non maximized window."), QMessageBox.Ok, QMessageBox.Ok)
@@ -284,9 +288,9 @@ class ImageMapPlugin:
     # on diffent OS's there seems to be different offsets to be taken into account
     magic=0
     if platform.system() == "Linux":
-      magic=2
+      magic=0 # mmm, not magic anymore?
     elif platform.system() == "Windows":
-      magic=4
+      magic=0 # mmm, not magic anymore?
     newWidth=newWidth+magic
     newHeight=newHeight+magic
     diffWidth=mapCanvas.size().width()-newWidth
